@@ -1,11 +1,51 @@
+from datetime import datetime, timedelta
+
 from sqlalchemy.orm import Session
 from fastapi import HTTPException, status
 from goit_h11_rest_api_contacts.database.models import Contact
 from goit_h11_rest_api_contacts.schemas import ContactOut, ContactIn
 
 
-async def get_contacts(db: Session) -> list[ContactOut]:
-    contacts = db.query(Contact).all()
+def to_many_params(search_name: str, search_email: str, upcoming_birthdays: bool):
+    return (
+        sum(
+            param is not None
+            for param in [search_name, search_email, upcoming_birthdays]
+        )
+        > 1
+    )
+
+
+async def get_contacts(
+    search_name: str, search_email: str, upcoming_birthdays: bool, db: Session
+) -> list[ContactOut]:
+    if to_many_params(search_name, search_email, upcoming_birthdays):
+        raise HTTPException(
+            status_code=400, detail="You can only search by one parameter at a time."
+        )
+    if search_name:
+        contacts = (
+            db.query(Contact)
+            .filter(
+                Contact.first_name.ilike(f"%{search_name}%")
+                | Contact.last_name.ilike(f"%{search_name}%")
+            )
+            .all()
+        )
+    elif search_email:
+        contacts = (
+            db.query(Contact).filter(Contact.email.ilike(f"%{search_email}%")).all()
+        )
+    elif upcoming_birthdays:
+        today = datetime.now().date()
+        next_week = today + timedelta(days=7)
+        contacts_to_check = db.query(Contact).all()
+        contacts = []
+        for contact in contacts_to_check:
+            if today <= contact.birth_date.replace(year=today.year).date() <= next_week:
+                contacts.append(contact)
+    else:
+        contacts = db.query(Contact).all()
     return [
         ContactOut(
             id=contact.id,
