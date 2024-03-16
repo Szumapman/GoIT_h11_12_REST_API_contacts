@@ -1,10 +1,11 @@
 from typing import List
 from fastapi import APIRouter, Depends, status, Query, Path
-from sqlalchemy.orm import Session
 
-from goit_h11_rest_api_contacts.database.db import get_db
 from goit_h11_rest_api_contacts.schemas import ContactIn, ContactOut
-from goit_h11_rest_api_contacts.repository import contacts as repository_contacts
+from goit_h11_rest_api_contacts.repository.abstract_repository import (
+    AbstractContactsRepository,
+)
+from goit_h11_rest_api_contacts.database.dependencies import get_repository
 
 router = APIRouter(prefix="/contacts", tags=["contacts"])
 
@@ -18,10 +19,10 @@ async def read_contacts(
     upcoming_birthdays: None | bool = Query(
         None, description="Get contacts with birthdays in the next 7 days"
     ),
-    db: Session = Depends(get_db),
+    contact_repo: AbstractContactsRepository = Depends(get_repository),
 ) -> List[ContactOut]:
-    contacts = await repository_contacts.get_contacts(
-        search_name, search_email, upcoming_birthdays, db
+    contacts = await contact_repo.get_contacts(
+        search_name, search_email, upcoming_birthdays
     )
     return contacts
 
@@ -29,26 +30,31 @@ async def read_contacts(
 @router.get("/{contact_id}")
 async def read_contact(
     contact_id: int = Path(description="The ID of the contact to get", gt=0),
-    db: Session = Depends(get_db),
+    contact_repo: AbstractContactsRepository = Depends(get_repository),
 ) -> ContactOut:
-    contact = await repository_contacts.get_contact(contact_id, db)
+    contact = await contact_repo.get_contact(contact_id)
     return contact
 
 
 @router.post("/", status_code=status.HTTP_201_CREATED)
 async def create_contact(
-    contact: ContactIn, db: Session = Depends(get_db)
+    contact: ContactIn,
+    contact_repo: AbstractContactsRepository = Depends(get_repository),
 ) -> ContactOut:
-    return await repository_contacts.create_contact(contact, db)
+    return await contact_repo.create_contact(contact)
 
 
 @router.put("/{contact_id}")
 async def update_contact(
-    contact_id: int, contact: ContactIn, db: Session = Depends(get_db)
+    contact_id: int,
+    contact: ContactIn,
+    contact_repo: AbstractContactsRepository = Depends(get_repository),
 ) -> ContactOut:
-    return await repository_contacts.update_contact(contact_id, contact, db)
+    return await contact_repo.update_contact(contact_id, contact)
 
 
 @router.delete("/{contact_id}")
-async def delete_contact(contact_id: int, db: Session = Depends(get_db)) -> ContactOut:
-    return await repository_contacts.delete_contact(contact_id, db)
+async def delete_contact(
+    contact_id: int, contact_repo: AbstractContactsRepository = Depends(get_repository)
+) -> ContactOut:
+    return await contact_repo.delete_contact(contact_id)
