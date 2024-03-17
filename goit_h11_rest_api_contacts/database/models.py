@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, DateTime
+from sqlalchemy import Column, Integer, String, DateTime, JSON
 from sqlalchemy.ext.declarative import declarative_base
 
 Base = declarative_base()
@@ -12,4 +12,4 @@ class Contact(Base):
     email = Column(String(150), nullable=False, unique=True)
     phone = Column(String(50), nullable=False, unique=True)
     birth_date = Column(DateTime, nullable=False)
-    additional_info = Column(String(500))
+    additional_info = Column(JSON, nullable=True)
