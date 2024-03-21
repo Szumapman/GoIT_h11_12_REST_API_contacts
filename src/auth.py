@@ -29,12 +29,12 @@ class Auth:
         return self.pwd_context.hash(password)
 
     # generic function to generate a token
-    async def _create_token(self, data: dict, expires_delta: timedelta) -> str:
+    async def _create_token(
+        self, data: dict, expires_delta: timedelta, scope: str
+    ) -> str:
         to_encode = data.copy()
         expire = datetime.utcnow() + expires_delta
-        to_encode.update(
-            {"iat": datetime.utcnow(), "exp": expire, "scope": "access_token"}
-        )
+        to_encode.update({"iat": datetime.utcnow(), "exp": expire, "scope": scope})
         encoded_token = jwt.encode(to_encode, self.SECRET_KEY, algorithm=self.ALGORITHM)
         return encoded_token
 
@@ -43,14 +43,14 @@ class Auth:
     ) -> str:
         if not expires_delta:
             expires_delta = timedelta(minutes=15)
-        return await self._create_token(data, expires_delta)
+        return await self._create_token(data, expires_delta, "access_token")
 
     async def create_refresh_token(
         self, data: dict, expires_delta: timedelta = None
     ) -> str:
         if not expires_delta:
             expires_delta = timedelta(days=7)
-        return await self._create_token(data, expires_delta)
+        return await self._create_token(data, expires_delta, "refresh_token")
 
     async def decode_refresh_token(self, refresh_token: str) -> str:
         try:
