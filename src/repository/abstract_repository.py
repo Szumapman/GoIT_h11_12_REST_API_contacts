@@ -1,6 +1,6 @@
 import abc
 
-from src.schemas import ContactIn, ContactOut
+from src.schemas import ContactIn, ContactOut, UserIn, UserOut
 
 
 class AbstractContactsRepository(abc.ABC):
@@ -27,4 +27,18 @@ class AbstractContactsRepository(abc.ABC):
 
     @abc.abstractmethod
     async def delete_contact(self, contact_id: int) -> ContactOut:
+        pass
+
+
+class AbstractUsersRepository(abc.ABC):
+    @abc.abstractmethod
+    async def get_user_by_email(self, email: str) -> UserOut:
+        pass
+
+    @abc.abstractmethod
+    async def create_user(self, user: UserIn) -> UserOut:
+        pass
+
+    @abc.abstractmethod
+    async def update_token(self, user: UserOut, token: str | None) -> None:
         pass
