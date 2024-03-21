@@ -5,8 +5,8 @@ from sqlalchemy import pool
 
 from alembic import context
 
-from goit_h11_rest_api_contacts.database.models import Base
-from goit_h11_rest_api_contacts.database.db import SQLALCHEMY_DATABASE_URL
+from src.database.models import Base
+from src.database.db import SQLALCHEMY_DATABASE_URL
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.

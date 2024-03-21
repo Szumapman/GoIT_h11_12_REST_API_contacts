@@ -1,6 +1,6 @@
 import abc
 
-from goit_h11_rest_api_contacts.schemas import ContactIn, ContactOut
+from src.schemas import ContactIn, ContactOut
 
 
 class AbstractContactsRepository(abc.ABC):

@@ -2,11 +2,11 @@ from datetime import datetime, timedelta
 
 from fastapi import HTTPException, status
 
-from goit_h11_rest_api_contacts.repository.abstract_repository import (
+from src.repository.abstract_repository import (
     AbstractContactsRepository,
 )
-from goit_h11_rest_api_contacts.database.models import Contact
-from goit_h11_rest_api_contacts.schemas import ContactOut, ContactIn
+from src.database.models import Contact
+from src.schemas import ContactOut, ContactIn
 
 
 class PostgresContactRepository(AbstractContactsRepository):

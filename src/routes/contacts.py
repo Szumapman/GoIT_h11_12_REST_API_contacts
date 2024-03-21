@@ -1,11 +1,11 @@
 from typing import List
 from fastapi import APIRouter, Depends, status, Query, Path
 
-from goit_h11_rest_api_contacts.schemas import ContactIn, ContactOut
-from goit_h11_rest_api_contacts.repository.abstract_repository import (
+from src.schemas import ContactIn, ContactOut
+from src.repository.abstract_repository import (
     AbstractContactsRepository,
 )
-from goit_h11_rest_api_contacts.database.dependencies import get_repository
+from src.database.dependencies import get_repository
 
 router = APIRouter(prefix="/contacts", tags=["contacts"])
 

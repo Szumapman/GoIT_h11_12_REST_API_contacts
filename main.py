@@ -1,7 +1,7 @@
 import uvicorn
 from fastapi import FastAPI
 
-from goit_h11_rest_api_contacts.routes import contacts
+from src.routes import contacts
 
 app = FastAPI()
 
