@@ -15,6 +15,8 @@ alembic = "^1.13.1"
 pydantic = {extras = ["email"], version = "^2.6.4"}
 pydantic-extra-types = "^2.6.0"
 phonenumbers = "^8.13.32"
+python-jose = {extras = ["cryptography"], version = "^3.3.0"}
+passlib = {extras = ["bcrypt"], version = "^1.7.4"}
 
 
 [tool.poetry.group.dev.dependencies]
