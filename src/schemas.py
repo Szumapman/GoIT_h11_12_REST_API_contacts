@@ -1,9 +1,9 @@
 import re
 from typing import Dict
+from datetime import date, datetime
 
 from pydantic import BaseModel, Field, EmailStr, field_validator
 from pydantic_extra_types.phone_numbers import PhoneNumber
-from datetime import date, datetime
 
 
 class ContactIn(BaseModel):
