@@ -2,9 +2,7 @@ from datetime import datetime, timedelta
 
 from fastapi import HTTPException, status
 
-from src.repository.abstract_repository import (
-    AbstractContactsRepository,
-)
+from src.repository.abstract_repository import AbstractContactsRepository
 from src.database.models import Contact
 from src.schemas import ContactOut, ContactIn
 
