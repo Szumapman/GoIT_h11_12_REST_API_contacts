@@ -22,7 +22,7 @@ class ContactOut(ContactIn):
     id: int = Field(default=1, ge=1)
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 
 class UserIn(BaseModel):
@@ -49,7 +49,7 @@ class UserOut(UserIn):
     created_at: datetime
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 
 class UserCreated(BaseModel):
