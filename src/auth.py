@@ -1,4 +1,5 @@
 import os
+import secrets
 from dotenv import load_dotenv
 from datetime import datetime, timedelta
 
@@ -17,16 +18,21 @@ class Auth:
     pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
     SECRET_KEY = os.getenv("SECRET_KEY")
     ALGORITHM = "HS256"
+    SALT_LENGTH = int(os.getenv("SALT_LENGTH"))
     oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/login")
 
     def __init__(self, user_repository: AbstractUsersRepository) -> None:
         self._user_repository = user_repository
 
-    def verify_password(self, plain_password: str, hashed_password: str) -> bool:
-        return self.pwd_context.verify(plain_password, hashed_password)
+    def verify_password(
+        self, plain_password: str, hashed_password: str, salt: str
+    ) -> bool:
+        return self.pwd_context.verify(plain_password + salt, hashed_password)
 
-    def get_password_hash(self, password: str) -> str:
-        return self.pwd_context.hash(password)
+    def get_password_hash(self, password: str) -> (str, str):
+        salt = secrets.token_hex(self.SALT_LENGTH)
+        password = self.pwd_context.hash(password + salt)
+        return password, salt
 
     # generic function to generate a token
     async def _create_token(
