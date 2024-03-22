@@ -9,12 +9,8 @@ class PostgresUserRepository(AbstractUsersRepository):
     def __init__(self, session):
         self._session = session
 
-    async def get_user_by_email(self, email: str) -> UserOut:
+    async def get_user_by_email(self, email: str) -> UserOut | None:
         user = self._session.query(User).filter(User.email == email).first()
-        if not user:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND, detail="User not found"
-            )
         return user
 
     async def create_user(self, user: UserIn) -> UserOut:
