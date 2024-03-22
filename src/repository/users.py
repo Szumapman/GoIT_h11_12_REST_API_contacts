@@ -13,9 +13,12 @@ class PostgresUserRepository(AbstractUsersRepository):
         user = self._session.query(User).filter(User.email == email).first()
         return user
 
-    async def create_user(self, user: UserIn) -> UserOut:
+    async def create_user(self, user: UserIn, salt: str) -> UserOut:
         new_user = User(
-            username=user.username, email=user.email, password=user.password
+            username=user.username,
+            email=user.email,
+            password=user.password,
+            salt=salt,
         )
         self._session.add(new_user)
         self._session.commit()
@@ -25,6 +28,7 @@ class PostgresUserRepository(AbstractUsersRepository):
             username=new_user.username,
             email=new_user.email,
             password=new_user.password,
+            salt=new_user.salt,
             created_at=new_user.created_at,
         )
 

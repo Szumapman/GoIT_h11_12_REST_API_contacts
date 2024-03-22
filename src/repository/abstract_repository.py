@@ -43,7 +43,7 @@ class AbstractUsersRepository(abc.ABC):
         pass
 
     @abc.abstractmethod
-    async def create_user(self, user: UserIn) -> UserOut:
+    async def create_user(self, user: UserIn, salt: str) -> UserOut:
         pass
 
     @abc.abstractmethod
