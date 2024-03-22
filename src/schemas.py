@@ -21,6 +21,9 @@ class ContactIn(BaseModel):
 class ContactOut(ContactIn):
     id: int = Field(default=1, ge=1)
 
+    class Config:
+        orm_mode = True
+
 
 class UserIn(BaseModel):
     username: str = Field(min_length=5, max_length=150, unique=True)
