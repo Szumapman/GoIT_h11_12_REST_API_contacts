@@ -39,5 +39,6 @@ class User(Base):
     username = Column(String(150), nullable=False, unique=True)
     email = Column(String(150), nullable=False, unique=True)
     password = Column(String(150), nullable=False)
+    salt = Column(String(32), nullable=False)
     created_at = Column("created_at", DateTime, default=func.now())
     refresh_token = Column(String(255), nullable=True)
