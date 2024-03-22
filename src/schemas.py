@@ -34,7 +34,9 @@ class UserIn(BaseModel):
     def validate_password(cls, password: str) -> str:
         if len(password) < 8:
             raise ValueError("Password must be at least 8 characters long")
-        if not re.match(r"^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*\W).{8,150}$", password):
+        elif len(password) > 75:
+            raise ValueError("Password must be at most 75 characters long")
+        if not re.match(r"^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*\W).{8,75}$", password):
             raise ValueError(
                 "Password must contain at least one uppercase letter, one lowercase letter, one digit and one special character"
             )
@@ -43,6 +45,7 @@ class UserIn(BaseModel):
 
 class UserOut(UserIn):
     id: int = Field(default=1, ge=1)
+    salt: str
     created_at: datetime
 
     class Config:
