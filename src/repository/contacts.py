@@ -1,10 +1,11 @@
 from datetime import datetime, timedelta
 
 from fastapi import HTTPException, status
+from sqlalchemy import and_
 
 from src.repository.abstract_repository import AbstractContactsRepository
 from src.database.models import Contact
-from src.schemas import ContactOut, ContactIn
+from src.schemas import ContactOut, ContactIn, UserOut, UserIn
 
 
 class PostgresContactRepository(AbstractContactsRepository):
@@ -12,7 +13,11 @@ class PostgresContactRepository(AbstractContactsRepository):
         self._session = session
 
     async def get_contacts(
-        self, search_name: str, search_email: str, upcoming_birthdays: bool
+        self,
+        search_name: str,
+        search_email: str,
+        upcoming_birthdays: bool,
+        user: UserOut,
     ) -> list[ContactOut]:
         if (
             sum(
@@ -29,21 +34,31 @@ class PostgresContactRepository(AbstractContactsRepository):
             contacts = (
                 self._session.query(Contact)
                 .filter(
-                    Contact.first_name.ilike(f"%{search_name}%")
-                    | Contact.last_name.ilike(f"%{search_name}%")
+                    and_(
+                        Contact.user_id == user.id,
+                        Contact.first_name.ilike(f"%{search_name}%")
+                        | Contact.last_name.ilike(f"%{search_name}%"),
+                    )
                 )
                 .all()
             )
         elif search_email:
             contacts = (
                 self._session.query(Contact)
-                .filter(Contact.email.ilike(f"%{search_email}%"))
+                .filter(
+                    and_(
+                        Contact.email.ilike(f"%{search_email}%"),
+                        Contact.user_id == user.id,
+                    )
+                )
                 .all()
             )
         elif upcoming_birthdays:
             today = datetime.now().date()
             next_week = today + timedelta(days=7)
-            contacts_to_check = self._session.query(Contact).all()
+            contacts_to_check = (
+                self._session.query(Contact).filter(Contact.user_id == user.id).all()
+            )
             contacts = []
             for contact in contacts_to_check:
                 if (
@@ -53,7 +68,9 @@ class PostgresContactRepository(AbstractContactsRepository):
                 ):
                     contacts.append(contact)
         else:
-            contacts = self._session.query(Contact).all()
+            contacts = (
+                self._session.query(Contact).filter(Contact.user_id == user.id).all()
+            )
         return [
             ContactOut(
                 id=contact.id,
@@ -67,8 +84,12 @@ class PostgresContactRepository(AbstractContactsRepository):
             for contact in contacts
         ]
 
-    async def get_contact(self, contact_id: int) -> ContactOut:
-        contact = self._session.query(Contact).filter(Contact.id == contact_id).first()
+    async def get_contact(self, contact_id: int, user: UserOut) -> ContactOut:
+        contact = (
+            self._session.query(Contact)
+            .filter(and_(Contact.id == contact_id, Contact.user_id == user.id))
+            .first()
+        )
         if contact is None:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND, detail="Contact not found"
@@ -81,9 +102,10 @@ class PostgresContactRepository(AbstractContactsRepository):
             phone=contact.phone,
             birth_date=contact.birth_date,
             additional_info=contact.additional_info,
+            user_id=user.id,
         )
 
-    async def create_contact(self, contact: ContactIn) -> ContactOut:
+    async def create_contact(self, contact: ContactIn, user: UserOut) -> ContactOut:
         contact = Contact(
             first_name=contact.first_name,
             last_name=contact.last_name,
@@ -91,6 +113,7 @@ class PostgresContactRepository(AbstractContactsRepository):
             phone=contact.phone,
             birth_date=contact.birth_date,
             additional_info=contact.additional_info,
+            user_id=user.id,
         )
         self._session.add(contact)
         self._session.commit()
@@ -103,11 +126,16 @@ class PostgresContactRepository(AbstractContactsRepository):
             phone=contact.phone,
             birth_date=contact.birth_date,
             additional_info=contact.additional_info,
+            user_id=user.id,
         )
 
-    async def update_contact(self, contact_id: int, contact: ContactIn) -> ContactOut:
+    async def update_contact(
+        self, contact_id: int, contact: ContactIn, user: UserOut
+    ) -> ContactOut:
         changed_contact = (
-            self._session.query(Contact).filter(Contact.id == contact_id).first()
+            self._session.query(Contact)
+            .filter(and_(Contact.id == contact_id, Contact.user_id == user.id))
+            .first()
         )
         if changed_contact is None:
             raise HTTPException(
@@ -129,10 +157,15 @@ class PostgresContactRepository(AbstractContactsRepository):
             phone=changed_contact.phone,
             birth_date=changed_contact.birth_date,
             additional_info=changed_contact.additional_info,
+            user_id=user.id,
         )
 
-    async def delete_contact(self, contact_id: int) -> ContactOut:
-        contact = self._session.query(Contact).filter(Contact.id == contact_id).first()
+    async def delete_contact(self, contact_id: int, user: UserOut) -> ContactOut:
+        contact = (
+            self._session.query(Contact)
+            .filter(and_(Contact.id == contact_id, Contact.user_id == user.id))
+            .first()
+        )
         if contact is None:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND, detail="Contact not found"
@@ -147,4 +180,5 @@ class PostgresContactRepository(AbstractContactsRepository):
             phone=contact.phone,
             birth_date=contact.birth_date,
             additional_info=contact.additional_info,
+            user_id=user.id,
         )

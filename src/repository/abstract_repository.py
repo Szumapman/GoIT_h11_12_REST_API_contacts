@@ -10,23 +10,30 @@ class AbstractContactsRepository(abc.ABC):
         search_name: str,
         search_email: str,
         upcoming_birthdays: bool,
+        user: UserOut,
     ) -> list[ContactOut]:
         pass
 
     @abc.abstractmethod
-    async def get_contact(self, contact_id: int) -> ContactOut:
+    async def get_contact(
+        self,
+        contact_id: int,
+        user: UserOut,
+    ) -> ContactOut:
         pass
 
     @abc.abstractmethod
-    async def create_contact(self, contact: ContactIn) -> ContactOut:
+    async def create_contact(self, contact: ContactIn, user: UserOut) -> ContactOut:
         pass
 
     @abc.abstractmethod
-    async def update_contact(self, contact_id: int, contact: ContactIn) -> ContactOut:
+    async def update_contact(
+        self, contact_id: int, contact: ContactIn, user: UserOut
+    ) -> ContactOut:
         pass
 
     @abc.abstractmethod
-    async def delete_contact(self, contact_id: int) -> ContactOut:
+    async def delete_contact(self, contact_id: int, user: UserOut) -> ContactOut:
         pass
 
 
