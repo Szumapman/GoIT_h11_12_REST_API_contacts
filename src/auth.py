@@ -2,10 +2,10 @@ import os
 from dotenv import load_dotenv
 from datetime import datetime, timedelta
 
-from jose import JWTError, jwt
 from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
 from passlib.context import CryptContext
+from jose import JWTError, jwt
 
 from src.database.dependencies import get_user_repository
 from src.repository.abstract_repository import AbstractUsersRepository
@@ -58,7 +58,7 @@ class Auth:
                 refresh_token, self.SECRET_KEY, algorithms=[self.ALGORITHM]
             )
             if payload["scope"] == "refresh_token":
-                email = payload["sub"]  # ???
+                email = payload["sub"]
                 return email
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
