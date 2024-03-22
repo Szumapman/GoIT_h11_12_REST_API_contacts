@@ -1,13 +1,11 @@
-from typing import List
-
-from fastapi import APIRouter, HTTPException, Security, Depends, status, Query, Path
+from fastapi import APIRouter, HTTPException, Security, Depends, status
 from fastapi.security import (
     OAuth2PasswordRequestForm,
     HTTPAuthorizationCredentials,
     HTTPBearer,
 )
 
-from src.schemas import UserIn, UserOut, UserCreated, TokenModel
+from src.schemas import UserIn, UserCreated, TokenModel
 from src.repository.abstract_repository import AbstractUsersRepository
 from src.database.dependencies import get_user_repository
 from src.auth import auth_service
@@ -25,8 +23,8 @@ async def signup(
             status_code=status.HTTP_409_CONFLICT,
             detail=f"User with email:{body.email} already exists",
         )
-    body.password = auth_service.get_password_hash(body.password)
-    user = await user_repo.create_user(body)
+    body.password, salt = auth_service.get_password_hash(body.password)
+    user = await user_repo.create_user(body, salt)
     return {"user": user, "detail": "User successfully created"}
 
 
@@ -43,7 +41,7 @@ async def login(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Incorrect email or password",
         )
-    if not auth_service.verify_password(body.password, user.password):
+    if not auth_service.verify_password(body.password, user.password, user.salt):
         # incorrect password
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
