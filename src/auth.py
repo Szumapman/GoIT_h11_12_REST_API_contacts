@@ -17,7 +17,7 @@ class Auth:
     load_dotenv()
     pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
     SECRET_KEY = os.getenv("SECRET_KEY")
-    ALGORITHM = "HS256"
+    ALGORITHM = os.getenv("ALGORITHM")
     SALT_LENGTH = int(os.getenv("SALT_LENGTH"))
     oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/login")
 
