@@ -111,7 +111,7 @@ async def confirm_email(
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST, detail="Email already confirmed"
         )
-    await user_repo.confirm_email(user)
+    await user_repo.confirm_email(email)
     return {"message": "Email confirmed"}
 
 
