@@ -35,3 +35,13 @@ class PostgresUserRepository(AbstractUsersRepository):
     async def update_token(self, user: UserOut, token: str | None) -> None:
         user.refresh_token = token
         self._session.commit()
+
+    async def confirmed_email(self, email: str) -> None:
+        user = await self.get_user_by_email(email)
+        if not user:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=f"User with email:{email} not found",
+            )
+        user.confirmed = True
+        self._session.commit()
