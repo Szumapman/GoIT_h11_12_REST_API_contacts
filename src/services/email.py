@@ -39,7 +39,7 @@ async def send_email(email: EmailStr, username: str, host: str) -> None:
                 "token": token_verification,
                 "expiration": expiration_date,
             },
-            subtype="html",
+            subtype=MessageType.html,
         )
         fast_mail = FastMail(CONF)
         await fast_mail.send_message(message, template_name="email_template.html")
