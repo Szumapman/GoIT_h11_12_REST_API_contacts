@@ -12,6 +12,7 @@ from fastapi.security import (
     HTTPAuthorizationCredentials,
     HTTPBearer,
 )
+from fastapi_limiter.depends import RateLimiter
 
 from src.schemas import UserIn, UserCreated, TokenModel, RequestEmail
 from src.repository.abstract_repository import AbstractUsersRepository
@@ -23,7 +24,13 @@ router = APIRouter(prefix="/auth", tags=["auth"])
 security = HTTPBearer()
 
 
-@router.post("/signup", response_model=UserCreated, status_code=status.HTTP_201_CREATED)
+@router.post(
+    "/signup",
+    response_model=UserCreated,
+    status_code=status.HTTP_201_CREATED,
+    description="No more than 10 requests per minute",
+    dependencies=[Depends(RateLimiter(times=10, seconds=60))],
+)
 async def signup(
     body: UserIn,
     background_tasks: BackgroundTasks,
@@ -41,7 +48,12 @@ async def signup(
     return {"user": user, "detail": "User successfully created"}
 
 
-@router.post("/login", response_model=TokenModel)
+@router.post(
+    "/login",
+    response_model=TokenModel,
+    description="No more than 10 requests per minute",
+    dependencies=[Depends(RateLimiter(times=10, seconds=60))],
+)
 async def login(
     body: OAuth2PasswordRequestForm = Depends(),
     user_repo: AbstractUsersRepository = Depends(get_user_repository),
@@ -75,7 +87,12 @@ async def login(
     }
 
 
-@router.get("/refresh_token", response_model=TokenModel)
+@router.get(
+    "/refresh_token",
+    response_model=TokenModel,
+    description="No more than 10 requests per minute",
+    dependencies=[Depends(RateLimiter(times=10, seconds=60))],
+)
 async def refresh_token(
     credentials: HTTPAuthorizationCredentials = Security(security),
     user_repo: AbstractUsersRepository = Depends(get_user_repository),
@@ -97,7 +114,11 @@ async def refresh_token(
     }
 
 
-@router.get("/confirmed_email/{token}")
+@router.get(
+    "/confirmed_email/{token}",
+    description="No more than 10 requests per minute",
+    dependencies=[Depends(RateLimiter(times=10, seconds=60))],
+)
 async def confirm_email(
     token: str, user_repo: AbstractUsersRepository = Depends(get_user_repository)
 ):
@@ -115,7 +136,11 @@ async def confirm_email(
     return {"message": "Email confirmed"}
 
 
-@router.post("/request_email")
+@router.post(
+    "/request_email",
+    description="No more than 10 requests per minute",
+    dependencies=[Depends(RateLimiter(times=10, seconds=60))],
+)
 async def request_email(
     body: RequestEmail,
     background_tasks: BackgroundTasks,
