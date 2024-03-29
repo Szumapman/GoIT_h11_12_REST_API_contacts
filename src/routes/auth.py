@@ -131,4 +131,6 @@ async def request_email(
         background_tasks.add_task(
             send_email, user.email, user.username, request.base_url
         )
-    return {"message": "Email with confirmation link sent."}
+    return {
+        "message": "If the email address was in our database, we sent an email with a confirmation link."
+    }
