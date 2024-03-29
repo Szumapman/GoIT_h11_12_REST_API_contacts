@@ -95,3 +95,21 @@ async def refresh_token(
         "refresh_token": refresh_token,
         "token_type": "bearer",
     }
+
+
+@router.get("/confirmed_email/{token}")
+async def confirm_email(
+    token: str, user_repo: AbstractUsersRepository = Depends(get_user_repository)
+):
+    email = await auth_service.get_email_from_token(token)
+    user = await user_repo.get_user_by_email(email)
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST, detail="Verification error"
+        )
+    if user.confirmed:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST, detail="Email already confirmed"
+        )
+    await user_repo.confirm_email(user)
+    return {"message": "Email confirmed"}
