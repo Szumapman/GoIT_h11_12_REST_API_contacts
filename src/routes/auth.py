@@ -1,4 +1,12 @@
-from fastapi import APIRouter, HTTPException, Security, Depends, status
+from fastapi import (
+    APIRouter,
+    HTTPException,
+    Security,
+    Depends,
+    status,
+    BackgroundTasks,
+    Request,
+)
 from fastapi.security import (
     OAuth2PasswordRequestForm,
     HTTPAuthorizationCredentials,
@@ -9,6 +17,7 @@ from src.schemas import UserIn, UserCreated, TokenModel
 from src.repository.abstract_repository import AbstractUsersRepository
 from src.database.dependencies import get_user_repository
 from src.auth import auth_service
+from src.services.email import send_email
 
 router = APIRouter(prefix="/auth", tags=["auth"])
 security = HTTPBearer()
@@ -16,7 +25,10 @@ security = HTTPBearer()
 
 @router.post("/signup", response_model=UserCreated, status_code=status.HTTP_201_CREATED)
 async def signup(
-    body: UserIn, user_repo: AbstractUsersRepository = Depends(get_user_repository)
+    body: UserIn,
+    background_tasks: BackgroundTasks,
+    request: Request,
+    user_repo: AbstractUsersRepository = Depends(get_user_repository),
 ):
     if await user_repo.get_user_by_email(body.email):
         raise HTTPException(
@@ -25,6 +37,7 @@ async def signup(
         )
     body.password, salt = auth_service.get_password_hash(body.password)
     user = await user_repo.create_user(body, salt)
+    background_tasks.add_task(send_email, user.email, user.username, request.base_url)
     return {"user": user, "detail": "User successfully created"}
 
 

@@ -1,6 +1,7 @@
 import os
 from dotenv import load_dotenv
 from pathlib import Path
+from datetime import datetime
 
 from fastapi_mail import FastMail, MessageSchema, ConnectionConfig, MessageType
 from fastapi_mail.errors import ConnectionErrors
@@ -26,14 +27,17 @@ CONF = ConnectionConfig(
 
 async def send_email(email: EmailStr, username: str, host: str) -> None:
     try:
-        token_verivication = auth_service.create_email_token({"sub": email})
+        token_verification, expiration_date = auth_service.create_email_token(
+            {"sub": email}
+        )
         message = MessageSchema(
             subject="FastAPI Contacts App - Confirm your email",
             recipients=[email],
             template_body={
                 "host": host,
                 "username": username,
-                "token": token_verivication,
+                "token": token_verification,
+                "expiration": expiration_date,
             },
             subtype="html",
         )
