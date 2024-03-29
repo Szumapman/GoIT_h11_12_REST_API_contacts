@@ -49,3 +49,7 @@ class AbstractUsersRepository(abc.ABC):
     @abc.abstractmethod
     async def update_token(self, user: UserOut, token: str | None) -> None:
         pass
+
+    @abc.abstractmethod
+    async def confirm_email(self, email: str) -> None:
+        pass
