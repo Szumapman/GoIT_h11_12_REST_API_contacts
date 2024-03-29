@@ -54,6 +54,11 @@ async def login(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Incorrect email or password",
         )
+    if not user.confirmed:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Email not confirmed",
+        )
     if not auth_service.verify_password(body.password, user.password, user.salt):
         # incorrect password
         raise HTTPException(
