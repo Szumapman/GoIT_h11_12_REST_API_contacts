@@ -98,7 +98,7 @@ class Auth:
             raise credentials_exception
         return user
 
-    def create_email_token(self, data: dict) -> str:
+    def create_email_token(self, data: dict) -> (str, datetime):
         to_encode = data.copy()
         expire = datetime.utcnow() + timedelta(days=1)
         to_encode.update({"iat": datetime.utcnow(), "exp": expire})
