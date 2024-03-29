@@ -36,7 +36,7 @@ class PostgresUserRepository(AbstractUsersRepository):
         user.refresh_token = token
         self._session.commit()
 
-    async def confirmed_email(self, email: str) -> None:
+    async def confirm_email(self, email: str) -> None:
         user = await self.get_user_by_email(email)
         if not user:
             raise HTTPException(
