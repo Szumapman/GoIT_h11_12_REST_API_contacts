@@ -5,11 +5,23 @@ import uvicorn
 import redis.asyncio as redis
 from fastapi import FastAPI
 from fastapi_limiter import FastAPILimiter
+from fastapi.middleware.cors import CORSMiddleware
 
 from src.routes import contacts, auth
 
 load_dotenv()
 app = FastAPI()
+
+ORIGINS = ["http://localhost:3000"]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=ORIGINS,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
 
 app.include_router(auth.router, prefix="/api")
 app.include_router(contacts.router, prefix="/api")
