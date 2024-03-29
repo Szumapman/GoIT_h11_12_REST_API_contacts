@@ -103,7 +103,7 @@ class Auth:
         expire = datetime.utcnow() + timedelta(days=1)
         to_encode.update({"iat": datetime.utcnow(), "exp": expire})
         token = jwt.encode(to_encode, self.SECRET_KEY, algorithm=self.ALGORITHM)
-        return token
+        return token, expire
 
 
 auth_service = Auth(get_user_repository())
