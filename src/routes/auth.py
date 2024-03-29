@@ -13,7 +13,7 @@ from fastapi.security import (
     HTTPBearer,
 )
 
-from src.schemas import UserIn, UserCreated, TokenModel
+from src.schemas import UserIn, UserCreated, TokenModel, RequestEmail
 from src.repository.abstract_repository import AbstractUsersRepository
 from src.database.dependencies import get_user_repository
 from src.auth import auth_service
@@ -113,3 +113,22 @@ async def confirm_email(
         )
     await user_repo.confirm_email(user)
     return {"message": "Email confirmed"}
+
+
+@router.post("/request_email")
+async def request_email(
+    body: RequestEmail,
+    background_tasks: BackgroundTasks,
+    request: Request,
+    user_repo: AbstractUsersRepository = Depends(get_user_repository),
+) -> dict:
+    user = await user_repo.get_user_by_email(body.email)
+    if user.confirmed:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST, detail="Email already confirmed"
+        )
+    if user:
+        background_tasks.add_task(
+            send_email, user.email, user.username, request.base_url
+        )
+    return {"message": "Email with confirmation link sent."}
