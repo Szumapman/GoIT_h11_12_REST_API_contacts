@@ -47,7 +47,7 @@ class UserOut(UserIn):
     id: int = Field(default=1, ge=1)
     salt: str
     created_at: datetime
-    avatar: str | None = None
+    avatar: str
 
     class Config:
         from_attributes = True
