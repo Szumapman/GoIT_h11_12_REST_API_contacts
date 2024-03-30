@@ -1,4 +1,3 @@
-from dotenv import load_dotenv
 from pathlib import Path
 
 from fastapi_mail import FastMail, MessageSchema, ConnectionConfig, MessageType
@@ -8,7 +7,6 @@ from pydantic import EmailStr
 from src.services.auth import auth_service
 from src.conf.config import settings
 
-load_dotenv()
 CONF = ConnectionConfig(
     MAIL_USERNAME=settings.mail_username,
     MAIL_PASSWORD=settings.mail_password,
@@ -24,19 +22,22 @@ CONF = ConnectionConfig(
 )
 
 
-async def send_email(email: EmailStr, username: str, host: str) -> None:
+async def send_email(
+    email: EmailStr, username: str, request_type: str, host: str
+) -> None:
     try:
         token_verification, expiration_date = auth_service.create_email_token(
             {"sub": email}
         )
         message = MessageSchema(
-            subject="FastAPI Contacts App - Confirm your email",
+            subject=f"FastAPI Contacts App - {request_type}",
             recipients=[email],
             template_body={
                 "host": host,
                 "username": username,
                 "token": token_verification,
                 "expiration": expiration_date,
+                "request_type": request_type,
             },
             subtype=MessageType.html,
         )
