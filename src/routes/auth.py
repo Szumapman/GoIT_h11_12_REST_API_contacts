@@ -17,7 +17,7 @@ from fastapi_limiter.depends import RateLimiter
 from src.schemas import UserIn, UserCreated, TokenModel, RequestEmail
 from src.repository.abstract_repository import AbstractUsersRepository
 from src.database.dependencies import get_user_repository
-from src.auth import auth_service
+from src.services.auth import auth_service
 from src.services.email import send_email
 
 router = APIRouter(prefix="/auth", tags=["auth"])

@@ -1,5 +1,4 @@
-from fastapi import APIRouter, Depends, status, UploadFile, File
-from sqlalchemy.orm import Session
+from fastapi import APIRouter, Depends, UploadFile, File
 import cloudinary
 import cloudinary.uploader
 
@@ -7,7 +6,7 @@ from src.database.dependencies import get_user_repository
 from src.database.models import User
 from src.repository.abstract_repository import AbstractUsersRepository
 from src.schemas import UserOut
-from src.auth import auth_service
+from src.services.auth import auth_service
 from src.conf.config import settings
 
 router = APIRouter(prefix="/users", tags=["users"])

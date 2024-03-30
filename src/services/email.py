@@ -1,4 +1,3 @@
-import os
 from dotenv import load_dotenv
 from pathlib import Path
 
@@ -6,7 +5,7 @@ from fastapi_mail import FastMail, MessageSchema, ConnectionConfig, MessageType
 from fastapi_mail.errors import ConnectionErrors
 from pydantic import EmailStr
 
-from src.auth import auth_service
+from src.services.auth import auth_service
 from src.conf.config import settings
 
 load_dotenv()

@@ -2,7 +2,7 @@ from typing import List
 from fastapi import APIRouter, Depends, status, Query, Path
 from fastapi_limiter.depends import RateLimiter
 
-from src.auth import auth_service
+from src.services.auth import auth_service
 from src.schemas import ContactIn, ContactOut, UserOut
 from src.repository.abstract_repository import (
     AbstractContactsRepository,
