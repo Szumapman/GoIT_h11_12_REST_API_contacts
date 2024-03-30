@@ -19,7 +19,7 @@ class Auth:
     SECRET_KEY = settings.secret_key
     ALGORITHM = settings.algorithm
     SALT_LENGTH = settings.salt_length
-    oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/login")
+    oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/auth/login")
     redis_base = redis.Redis(host=settings.redis_host, port=settings.redis_port, db=0)
 
     def __init__(self, user_repository: AbstractUsersRepository) -> None:
