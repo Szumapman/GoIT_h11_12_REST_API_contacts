@@ -1,7 +1,5 @@
-import os
 import secrets
 import pickle
-from dotenv import load_dotenv
 from datetime import datetime, timedelta
 
 import redis
@@ -13,16 +11,16 @@ from jose import JWTError, jwt
 from src.database.dependencies import get_user_repository
 from src.repository.abstract_repository import AbstractUsersRepository
 from src.schemas import UserOut
+from src.conf.config import settings
 
 
 class Auth:
-    load_dotenv()
     pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
-    SECRET_KEY = os.getenv("SECRET_KEY")
-    ALGORITHM = os.getenv("ALGORITHM")
-    SALT_LENGTH = int(os.getenv("SALT_LENGTH"))
+    SECRET_KEY = settings.secret_key
+    ALGORITHM = settings.algorithm
+    SALT_LENGTH = settings.salt_length
     oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/login")
-    redis_base = redis.Redis(host=os.getenv("REDIS_HOST"), port=6379, db=0)
+    redis_base = redis.Redis(host=settings.redis_host, port=settings.redis_port, db=0)
 
     def __init__(self, user_repository: AbstractUsersRepository) -> None:
         self._user_repository = user_repository
