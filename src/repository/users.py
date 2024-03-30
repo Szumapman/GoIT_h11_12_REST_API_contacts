@@ -1,4 +1,6 @@
 from fastapi import HTTPException, status
+from libgravatar import Gravatar
+from sqlalchemy.orm import Session
 
 from src.repository.abstract_repository import AbstractUsersRepository
 from src.schemas import UserOut, UserIn
@@ -14,11 +16,18 @@ class PostgresUserRepository(AbstractUsersRepository):
         return user
 
     async def create_user(self, user: UserIn, salt: str) -> UserOut:
+        avatar = None
+        try:
+            gravatar = Gravatar(user.email)
+            avatar = gravatar.get_image(size=256)
+        except Exception as e:
+            print(e)
         new_user = User(
             username=user.username,
             email=user.email,
             password=user.password,
             salt=salt,
+            avatar=avatar,
         )
         self._session.add(new_user)
         self._session.commit()
@@ -30,6 +39,7 @@ class PostgresUserRepository(AbstractUsersRepository):
             password=new_user.password,
             salt=new_user.salt,
             created_at=new_user.created_at,
+            avatar=new_user.avatar,
         )
 
     async def update_token(self, user: UserOut, token: str | None) -> None:
