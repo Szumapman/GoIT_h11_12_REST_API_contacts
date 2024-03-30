@@ -1,4 +1,23 @@
-### GoIT moduł 2 web 
+### GoIT moduł 2 web
+# Zadanie domowe #13 (Część pierwsza - REST API)
+W tym zadaniu domowym kontynuujemy ulepszanie aplikacji opartej na REST API z poprzedniego zadania domowego.
+### Zadania
+- Zaimplementuj mechanizm weryfikacji adresu e-mail zarejestrowanego użytkownika;
+- Ogranicz liczbę żądań do tras kontaktów. Pamiętaj, aby ograniczyć maksymalną liczbę kontaktów tworzonych przez jednego użytkownika w określonym czasie;
+- Włącz CORS dla interfejsu API REST;
+- Zaimplementuj funkcjonalność umożliwiającą aktualizację awatara użytkownika. Skorzystaj w tym celu z usługi Cloudinary;
+
+### Wymagania ogólne
+- Wszystkie zmienne środowiskowe powinny być przechowywane w pliku `.env`. Kod nie powinien zawierać żadnych danych poufnych;
+> [!TIP]
+> Przed uruchomieniem programu należy utworzyć plik `.env`, zgodnie z dołączonym do projektu wzorcowym plikiem: `env`
+- Do uruchamiania usług i baz danych używany jest Docker Compose.
+
+### Dodatkowe zadania
+- Zaimplementuj mechanizm buforowania przy użyciu bazy danych Redis. Wykonaj buforowanie bieżącego użytkownika podczas autoryzacji;
+- Zaimplementuj mechanizm resetowania hasła dla aplikacji opartej na REST API.
+
+
 # Zadanie domowe #12 
 
 W tym zadaniu domowym kontynuujemy pracę nad REST-owym API aplikacji z poprzedniego zadania domowego. [Opis wcześniejszego zadania domowego #11](#zadanie-domowe-11)
