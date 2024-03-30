@@ -106,12 +106,12 @@ class Auth:
             user = pickle.loads(user)
         return user
 
-    def create_email_token(self, data: dict) -> (str, datetime):
+    def create_email_token(self, data: dict) -> (str, str):
         to_encode = data.copy()
         expire = datetime.utcnow() + timedelta(days=1)
         to_encode.update({"iat": datetime.utcnow(), "exp": expire})
         token = jwt.encode(to_encode, self.SECRET_KEY, algorithm=self.ALGORITHM)
-        return token, expire
+        return token, expire.strftime("%d-%m-%Y %H:%M")
 
     async def get_email_from_token(self, token: str) -> str:
         try:
