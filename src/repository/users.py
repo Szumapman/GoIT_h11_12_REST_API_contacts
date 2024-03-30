@@ -55,3 +55,22 @@ class PostgresUserRepository(AbstractUsersRepository):
             )
         user.confirmed = True
         self._session.commit()
+
+    async def update_avatar(self, email: str, avatar_url: str) -> UserOut:
+        user = await self.get_user_by_email(email)
+        if not user:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=f"User with email:{email} not found",
+            )
+        user.avatar = avatar_url
+        self._session.commit()
+        return UserOut(
+            id=user.id,
+            username=user.username,
+            email=user.email,
+            password=user.password,
+            salt=user.salt,
+            created_at=user.created_at,
+            avatar=user.avatar,
+        )
