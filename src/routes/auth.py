@@ -44,7 +44,10 @@ async def signup(
         )
     body.password, salt = auth_service.get_password_hash(body.password)
     user = await user_repo.create_user(body, salt)
-    background_tasks.add_task(send_email, user.email, user.username, request.base_url)
+    request_type = "Confirmation email"
+    background_tasks.add_task(
+        send_email, user.email, user.username, request_type, request.base_url
+    )
     return {"user": user, "detail": "User successfully created"}
 
 
@@ -153,9 +156,61 @@ async def request_email(
             status_code=status.HTTP_400_BAD_REQUEST, detail="Email already confirmed"
         )
     if user:
+        request_type = "Confirmation email"
         background_tasks.add_task(
-            send_email, user.email, user.username, request.base_url
+            send_email, user.email, user.username, request_type, request.base_url
         )
     return {
         "message": "If the email address was in our database, we sent an email with a confirmation link."
     }
+
+
+@router.post(
+    "/password-reset",
+    description="No more than 10 requests per minute",
+    dependencies=[Depends(RateLimiter(times=10, seconds=60))],
+)
+async def request_password_reset(
+    body: RequestEmail,
+    background_tasks: BackgroundTasks,
+    request: Request,
+    user_repo: AbstractUsersRepository = Depends(get_user_repository),
+) -> dict:
+    user = await user_repo.get_user_by_email(body.email)
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST, detail="Email not found"
+        )
+    if not user.confirmed:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST, detail="Email not confirmed"
+        )
+    if user:
+        request_type = "Reset password"
+        background_tasks.add_task(
+            send_email, user.email, user.username, request_type, request.base_url
+        )
+    return {
+        "message": "If the email address was in our database, we sent an email with link to reset password"
+    }
+
+
+@router.post(
+    "/password-reset/{token}",
+    description="No more than 10 requests per minute",
+    dependencies=[Depends(RateLimiter(times=10, seconds=60))],
+)
+async def reset_password(
+    token: str,
+    new_password: str,
+    user_repo: AbstractUsersRepository = Depends(get_user_repository),
+) -> dict:
+    email = await auth_service.get_email_from_token(token)
+    user = await user_repo.get_user_by_email(email)
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST, detail="Verification error"
+        )
+    password, salt = auth_service.get_password_hash(new_password)
+    await user_repo.update_password(email, password, salt)
+    return {"message": "Password changed"}
