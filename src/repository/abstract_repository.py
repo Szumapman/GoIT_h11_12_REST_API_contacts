@@ -53,3 +53,7 @@ class AbstractUsersRepository(abc.ABC):
     @abc.abstractmethod
     async def confirm_email(self, email: str) -> None:
         pass
+
+    @abc.abstractmethod
+    async def update_avatar(self, email: str, avatar_url: str) -> UserOut:
+        pass
