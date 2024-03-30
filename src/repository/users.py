@@ -1,6 +1,5 @@
 from fastapi import HTTPException, status
 from libgravatar import Gravatar
-from sqlalchemy.orm import Session
 
 from src.repository.abstract_repository import AbstractUsersRepository
 from src.schemas import UserOut, UserIn
@@ -74,3 +73,9 @@ class PostgresUserRepository(AbstractUsersRepository):
             created_at=user.created_at,
             avatar=user.avatar,
         )
+
+    async def update_password(self, email: str, password: str, salt: str) -> None:
+        user = await self.get_user_by_email(email)
+        user.password = password
+        user.salt = salt
+        self._session.commit()
