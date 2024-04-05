@@ -31,8 +31,6 @@ app.include_router(users.router, prefix="/api")
 
 async def startup_event():
     """
-    Startup event function that initializes a Redis connection and sets up the FastAPILimiter.
-
     This function is called during the startup of the FastAPI application. It creates a Redis connection using the settings from the application configuration, and then initializes the FastAPILimiter with the Redis connection.
 
     The FastAPILimiter is used to implement rate limiting for the API endpoints, to prevent abuse and ensure fair usage of the application.
