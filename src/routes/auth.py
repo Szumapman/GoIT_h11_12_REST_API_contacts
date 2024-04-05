@@ -37,6 +37,21 @@ async def signup(
     request: Request,
     user_repo: AbstractUsersRepository = Depends(get_user_repository),
 ):
+    """
+    Handles the signup process for new users.
+
+    Args:
+        body (UserIn): The user data to create a new user.
+        background_tasks (BackgroundTasks): Used to send the confirmation email in the background.
+        request (Request): The current HTTP request.
+        user_repo (AbstractUsersRepository): The repository to interact with the user data.
+
+    Raises:
+        HTTPException: If a user with the provided email already exists.
+
+    Returns:
+        UserCreated: The created user data.
+    """
     if await user_repo.get_user_by_email(body.email):
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT,
@@ -61,6 +76,19 @@ async def login(
     body: OAuth2PasswordRequestForm = Depends(),
     user_repo: AbstractUsersRepository = Depends(get_user_repository),
 ):
+    """
+    Handles the login process for existing users.
+
+    Args:
+        body (OAuth2PasswordRequestForm): The user credentials to authenticate the user.
+        user_repo (AbstractUsersRepository): The repository to interact with the user data.
+
+    Raises:
+        HTTPException: If the user email or password is incorrect, or if the user's email is not confirmed.
+
+    Returns:
+        TokenModel: The access and refresh tokens for the authenticated user.
+    """
     user = await user_repo.get_user_by_email(body.username)
     # because of security reasons we don't want to tell the user if the email or password is incorrect
     if not user:
@@ -100,6 +128,19 @@ async def refresh_token(
     credentials: HTTPAuthorizationCredentials = Security(security),
     user_repo: AbstractUsersRepository = Depends(get_user_repository),
 ):
+    """
+    Handles the refresh token process for authenticated users.
+
+    Args:
+        credentials (HTTPAuthorizationCredentials): The HTTP authorization credentials containing the refresh token.
+        user_repo (AbstractUsersRepository): The repository to interact with the user data.
+
+    Raises:
+        HTTPException: If the refresh token is invalid or does not match the user's stored refresh token.
+
+    Returns:
+        TokenModel: The new access and refresh tokens for the authenticated user.
+    """
     token = credentials.credentials
     email = await auth_service.decode_refresh_token(token)
     user = await user_repo.get_user_by_email(email)
@@ -125,6 +166,19 @@ async def refresh_token(
 async def confirm_email(
     token: str, user_repo: AbstractUsersRepository = Depends(get_user_repository)
 ):
+    """
+    Handles the email confirmation process for a user.
+
+    Args:
+        token (str): The email confirmation token.
+        user_repo (AbstractUsersRepository): The repository to interact with the user data.
+
+    Raises:
+        HTTPException: If the user does not exist or the email is already confirmed.
+
+    Returns:
+        dict: A message indicating that the email has been confirmed.
+    """
     email = await auth_service.get_email_from_token(token)
     user = await user_repo.get_user_by_email(email)
     if not user:
@@ -150,6 +204,21 @@ async def request_email(
     request: Request,
     user_repo: AbstractUsersRepository = Depends(get_user_repository),
 ) -> dict:
+    """
+    Handles the request for a user to receive an email confirmation.
+
+    Args:
+        body (RequestEmail): The request body containing the user's email.
+        background_tasks (BackgroundTasks): The background task scheduler to send the email.
+        request (Request): The current HTTP request.
+        user_repo (AbstractUsersRepository): The repository to interact with the user data.
+
+    Raises:
+        HTTPException: If the user's email is already confirmed.
+
+    Returns:
+        dict: A message indicating that an email has been sent if the email was in the database.
+    """
     user = await user_repo.get_user_by_email(body.email)
     if user.confirmed:
         raise HTTPException(
@@ -176,6 +245,21 @@ async def request_password_reset(
     request: Request,
     user_repo: AbstractUsersRepository = Depends(get_user_repository),
 ) -> dict:
+    """
+    Handles the request to reset a user's password.
+
+    Args:
+        body (RequestEmail): The request body containing the user's email.
+        background_tasks (BackgroundTasks): The background task scheduler to send the email.
+        request (Request): The current HTTP request.
+        user_repo (AbstractUsersRepository): The repository to interact with the user data.
+
+    Raises:
+        HTTPException: If the user's email is not found or not confirmed.
+
+    Returns:
+        dict: A message indicating that an email has been sent if the email was in the database and confirmed.
+    """
     user = await user_repo.get_user_by_email(body.email)
     if not user:
         raise HTTPException(
@@ -205,6 +289,20 @@ async def reset_password(
     new_password: str,
     user_repo: AbstractUsersRepository = Depends(get_user_repository),
 ) -> dict:
+    """
+    Resets a user's password using the provided token and new password.
+
+    Args:
+        token (str): The password reset token.
+        new_password (str): The new password to set for the user.
+        user_repo (AbstractUsersRepository): The repository to interact with the user data.
+
+    Raises:
+        HTTPException: If the verification token is invalid or the user is not found.
+
+    Returns:
+        dict: A message indicating that the password has been changed.
+    """
     email = await auth_service.get_email_from_token(token)
     user = await user_repo.get_user_by_email(email)
     if not user:

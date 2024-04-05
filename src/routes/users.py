@@ -16,6 +16,12 @@ router = APIRouter(prefix="/users", tags=["users"])
 async def read_current_user(
     current_user: UserOut = Depends(auth_service.get_current_user),
 ):
+    """
+    Retrieves the current authenticated user.
+
+    Returns:
+        UserOut: The current authenticated user.
+    """
     return current_user
 
 
@@ -25,6 +31,17 @@ async def update_user_avatar(
     current_user: User = Depends(auth_service.get_current_user),
     user_repo: AbstractUsersRepository = Depends(get_user_repository),
 ):
+    """
+    Updates the avatar of the current authenticated user.
+
+    Args:
+        file (UploadFile): The file containing the new avatar image.
+        current_user (User): The current authenticated user.
+        user_repo (AbstractUsersRepository): The repository for managing user data.
+
+    Returns:
+        UserOut: The updated user with the new avatar.
+    """
     cloudinary.config(
         cloud_name=settings.cloudinary_name,
         api_key=settings.cloudinary_api_key,

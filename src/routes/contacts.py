@@ -28,6 +28,19 @@ async def read_contacts(
     current_user: UserOut = Depends(auth_service.get_current_user),
     contact_repo: AbstractContactsRepository = Depends(get_contact_repository),
 ) -> List[ContactOut]:
+    """
+    Retrieves a list of contacts based on the provided search criteria.
+
+    Args:
+        search_name (str, optional): Search contacts by first or last name.
+        search_email (str, optional): Search contacts by email.
+        upcoming_birthdays (bool, optional): Get contacts with birthdays in the next 7 days.
+        current_user (UserOut): The current authenticated user.
+        contact_repo (AbstractContactsRepository): The contacts repository.
+
+    Returns:
+        List[ContactOut]: A list of contacts matching the search criteria.
+    """
     contacts = await contact_repo.get_contacts(
         search_name, search_email, upcoming_birthdays, current_user
     )
@@ -44,6 +57,17 @@ async def read_contact(
     current_user: UserOut = Depends(auth_service.get_current_user),
     contact_repo: AbstractContactsRepository = Depends(get_contact_repository),
 ) -> ContactOut:
+    """
+    Retrieves a single contact by its ID.
+
+    Args:
+        contact_id (int): The ID of the contact to retrieve.
+        current_user (UserOut): The current authenticated user.
+        contact_repo (AbstractContactsRepository): The contacts repository.
+
+    Returns:
+        ContactOut: The contact matching the provided ID.
+    """
     contact = await contact_repo.get_contact(contact_id, current_user)
     return contact
 
@@ -59,6 +83,17 @@ async def create_contact(
     current_user: UserOut = Depends(auth_service.get_current_user),
     contact_repo: AbstractContactsRepository = Depends(get_contact_repository),
 ) -> ContactOut:
+    """
+    Creates a new contact for the current authenticated user.
+
+    Args:
+        contact (ContactIn): The contact information to create.
+        current_user (UserOut): The current authenticated user.
+        contact_repo (AbstractContactsRepository): The contacts repository.
+
+    Returns:
+        ContactOut: The newly created contact.
+    """
     return await contact_repo.create_contact(contact, current_user)
 
 
@@ -73,6 +108,18 @@ async def update_contact(
     current_user: UserOut = Depends(auth_service.get_current_user),
     contact_repo: AbstractContactsRepository = Depends(get_contact_repository),
 ) -> ContactOut:
+    """
+    Updates an existing contact for the current authenticated user.
+
+    Args:
+        contact_id (int): The ID of the contact to update.
+        contact (ContactIn): The updated contact information.
+        current_user (UserOut): The current authenticated user.
+        contact_repo (AbstractContactsRepository): The contacts repository.
+
+    Returns:
+        ContactOut: The updated contact.
+    """
     return await contact_repo.update_contact(contact_id, contact, current_user)
 
 
@@ -86,4 +133,15 @@ async def delete_contact(
     current_user: UserOut = Depends(auth_service.get_current_user),
     contact_repo: AbstractContactsRepository = Depends(get_contact_repository),
 ) -> ContactOut:
+    """
+    Deletes an existing contact for the current authenticated user.
+
+    Args:
+        contact_id (int): The ID of the contact to delete.
+        current_user (UserOut): The current authenticated user.
+        contact_repo (AbstractContactsRepository): The contacts repository.
+
+    Returns:
+        ContactOut: The deleted contact.
+    """
     return await contact_repo.delete_contact(contact_id, current_user)

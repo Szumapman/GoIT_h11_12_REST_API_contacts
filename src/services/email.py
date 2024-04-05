@@ -25,6 +25,18 @@ CONF = ConnectionConfig(
 async def send_email(
     email: EmailStr, username: str, request_type: str, host: str
 ) -> None:
+    """
+    Sends an email with a token and expiration date for a given email address and request type.
+
+    Args:
+        email (EmailStr): The email address to send the email to.
+        username (str): The username associated with the email address.
+        request_type (str): The type of request being made ("registration" or "password reset").
+        host (str): The host URL for the application.
+
+    Raises:
+        ConnectionErrors: If there is an error connecting to the email server.
+    """
     try:
         token_verification, expiration_date = auth_service.create_email_token(
             {"sub": email}

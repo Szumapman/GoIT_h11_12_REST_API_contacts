@@ -9,7 +9,21 @@ from src.schemas import ContactOut, ContactIn, UserOut, UserIn
 
 
 class PostgresContactRepository(AbstractContactsRepository):
+    """
+    Concrete implementation of the Contacts repository.
+
+    Args:
+        AbstractContactsRepository (AbstractContactsRepository): Abstract base class for the Contacts repository.
+    """
+
     def __init__(self, session):
+        """
+        Initializes the PostgresContactRepository with the provided database session.
+
+        Args:
+            session (sqlalchemy.orm.Session): The database session to use for database operations.
+        """
+
         self._session = session
 
     async def get_contacts(
@@ -19,6 +33,21 @@ class PostgresContactRepository(AbstractContactsRepository):
         upcoming_birthdays: bool,
         user: UserOut,
     ) -> list[ContactOut]:
+        """
+        Retrieves a list of contacts based on the provided search parameters.
+
+        Args:
+            search_name (str): The name to search for in the contacts.
+            search_email (str): The email to search for in the contacts.
+            upcoming_birthdays (bool): Whether to retrieve contacts with upcoming birthdays.
+            user (UserOut): The user whose contacts to retrieve.
+
+        Returns:
+            list[ContactOut]: A list of contacts matching the search parameters.
+
+        Raises:
+            HTTPException: If more than one search parameter is provided.
+        """
         if (
             sum(
                 param is not None
@@ -85,6 +114,19 @@ class PostgresContactRepository(AbstractContactsRepository):
         ]
 
     async def get_contact(self, contact_id: int, user: UserOut) -> ContactOut:
+        """
+        Retrieves a contact by its ID for the specified user.
+
+        Args:
+            contact_id (int): The ID of the contact to retrieve.
+            user (UserOut): The user for whom the contact should be retrieved.
+
+        Returns:
+            ContactOut: The contact with the specified ID for the given user.
+
+        Raises:
+            HTTPException: If the contact is not found.
+        """
         contact = (
             self._session.query(Contact)
             .filter(and_(Contact.id == contact_id, Contact.user_id == user.id))
@@ -106,6 +148,16 @@ class PostgresContactRepository(AbstractContactsRepository):
         )
 
     async def create_contact(self, contact: ContactIn, user: UserOut) -> ContactOut:
+        """
+        Creates a new contact for the specified user.
+
+        Args:
+            contact (ContactIn): The contact information to create.
+            user (UserOut): The user for whom the contact should be created.
+
+        Returns:
+            ContactOut: The created contact.
+        """
         contact = Contact(
             first_name=contact.first_name,
             last_name=contact.last_name,
@@ -132,6 +184,20 @@ class PostgresContactRepository(AbstractContactsRepository):
     async def update_contact(
         self, contact_id: int, contact: ContactIn, user: UserOut
     ) -> ContactOut:
+        """
+        Updates an existing contact for the specified user.
+
+        Args:
+            contact_id (int): The ID of the contact to update.
+            contact (ContactIn): The updated contact information.
+            user (UserOut): The user for whom the contact should be updated.
+
+        Returns:
+            ContactOut: The updated contact.
+
+        Raises:
+            HTTPException: If the contact is not found.
+        """
         changed_contact = (
             self._session.query(Contact)
             .filter(and_(Contact.id == contact_id, Contact.user_id == user.id))
@@ -161,6 +227,19 @@ class PostgresContactRepository(AbstractContactsRepository):
         )
 
     async def delete_contact(self, contact_id: int, user: UserOut) -> ContactOut:
+        """
+        Deletes an existing contact for the specified user.
+
+        Args:
+            contact_id (int): The ID of the contact to delete.
+            user (UserOut): The user for whom the contact should be deleted.
+
+        Returns:
+            ContactOut: The deleted contact.
+
+        Raises:
+            HTTPException: If the contact is not found.
+        """
         contact = (
             self._session.query(Contact)
             .filter(and_(Contact.id == contact_id, Contact.user_id == user.id))
