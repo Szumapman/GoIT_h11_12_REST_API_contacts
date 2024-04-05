@@ -29,7 +29,6 @@ app.include_router(contacts.router, prefix="/api")
 app.include_router(users.router, prefix="/api")
 
 
-@app.on_event("startup")
 async def startup_event():
     redis_base = await redis.Redis(
         host=settings.redis_host,
@@ -40,6 +39,8 @@ async def startup_event():
     )
     await FastAPILimiter.init(redis_base)
 
+
+app.add_event_handler("startup", startup_event)
 
 if __name__ == "__main__":
     uvicorn.run(app, host="0.0.0.0", port=8000)
