@@ -44,19 +44,18 @@ class TestPostgresContactRepository(unittest.IsolatedAsyncioTestCase):
             user_id=1,
         )
 
-    # get_contacts
-    # async def test_get_contacts_success(self):
-    #     contacts = [
-    #         Contact(id=1, name="testcontact", email="test@example.com", user_id=1)
-    #     ]
-    #     self.session.query().filter().all.return_value = contacts
-    #     actual_contacts = await self.users_repository.get_contacts(
-    #         search_name="",
-    #         search_email="",
-    #         upcoming_birthdays=False,
-    #         user=self.user,
-    #     )
-    #     self.assertEqual(contacts, actual_contacts)
+    async def test_get_contacts_success_no_additional_argument(self):
+        contacts = [
+            self.contact,
+        ]
+        self.session.query().filter().all.return_value = contacts
+        actual_contacts = await self.users_repository.get_contacts(
+            search_name=None,
+            search_email=None,
+            upcoming_birthdays=False,
+            user=self.user,
+        )
+        self.assertEqual(contacts, actual_contacts)
 
     async def test_get_contact_success(self):
         contact = Contact(
