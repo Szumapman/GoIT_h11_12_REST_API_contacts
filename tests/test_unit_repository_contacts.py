@@ -4,19 +4,10 @@ from datetime import datetime, date
 
 from fastapi import HTTPException, status
 from sqlalchemy.orm import Session
-from sqlalchemy import and_
 
 from src.repository.contacts import PostgresContactRepository
 from src.database.models import Contact
 from src.schemas import ContactOut, ContactIn, UserOut, UserIn
-
-
-class MockedSession:
-    def commit(self):
-        pass
-
-    def refresh(self, contact):
-        pass
 
 
 class TestPostgresContactRepository(unittest.IsolatedAsyncioTestCase):
@@ -34,28 +25,89 @@ class TestPostgresContactRepository(unittest.IsolatedAsyncioTestCase):
             created_at=self.created_at_set,
             avatar="Avatar",
         )
-        self.contact = ContactOut(
+        self.contact = Contact(
             id=1,
             first_name="testname",
             last_name="lasttest",
             email="test@example.com",
             phone="+48654789654",
-            birth_date=datetime(2000, 1, 1),
+            birth_date=datetime(2000, 4, 12),
+            user_id=1,
+        )
+        self.contact_out = ContactOut(
+            id=1,
+            first_name="testname",
+            last_name="lasttest",
+            email="test@example.com",
+            phone="+48654789654",
+            birth_date=datetime(2000, 4, 12),
             user_id=1,
         )
 
-    async def test_get_contacts_success_no_additional_argument(self):
-        contacts = [
+    async def test_get_contacts_success(self):
+        contacts_to_query = [
             self.contact,
         ]
-        self.session.query().filter().all.return_value = contacts
-        actual_contacts = await self.users_repository.get_contacts(
-            search_name=None,
-            search_email=None,
-            upcoming_birthdays=False,
-            user=self.user,
-        )
-        self.assertEqual(contacts, actual_contacts)
+        contacts_out = [
+            self.contact_out,
+        ]
+        self.session.query().filter().all.return_value = contacts_to_query
+        test_cases = [
+            {"search_name": None, "search_email": None, "upcoming_birthdays": None},
+            {
+                "search_name": "testname",
+                "search_email": None,
+                "upcoming_birthdays": None,
+            },
+            {
+                "search_name": None,
+                "search_email": "test@example.com",
+                "upcoming_birthdays": None,
+            },
+            {"search_name": None, "search_email": None, "upcoming_birthdays": True},
+        ]
+        self.session.query().filter().all.return_value = contacts_to_query
+        for test_case in test_cases:
+            actual_contacts = await self.users_repository.get_contacts(
+                search_name=test_case["search_name"],
+                search_email=test_case["search_email"],
+                upcoming_birthdays=test_case["upcoming_birthdays"],
+                user=self.user,
+            )
+            self.assertEqual(contacts_out, actual_contacts)
+
+    async def test_get_contacts_exception_too_many_arguments(self):
+        test_cases = [
+            {
+                "search_name": "testname",
+                "search_email": "test@example.com",
+                "upcoming_birthdays": None,
+            },
+            {
+                "search_name": None,
+                "search_email": "test@example.com",
+                "upcoming_birthdays": True,
+            },
+            {
+                "search_name": "testname",
+                "search_email": None,
+                "upcoming_birthdays": True,
+            },
+            {
+                "search_name": "testname",
+                "search_email": "test@example.com",
+                "upcoming_birthdays": True,
+            },
+        ]
+        for test_case in test_cases:
+            with self.assertRaises(HTTPException) as context:
+                await self.users_repository.get_contacts(
+                    search_name=test_case["search_name"],
+                    search_email=test_case["search_email"],
+                    upcoming_birthdays=test_case["upcoming_birthdays"],
+                    user=self.user,
+                )
+            self.assertEqual(context.exception.status_code, status.HTTP_400_BAD_REQUEST)
 
     async def test_get_contact_success(self):
         contact = Contact(
