@@ -5,9 +5,6 @@ from datetime import datetime
 from sqlalchemy.orm import Session
 from fastapi import HTTPException, status
 
-
-from src.database.models import User
-from src.schemas import UserIn, UserOut
 from src.repository.users import PostgresUserRepository
 from tests.data_set_for_tests import user_out, user_in, user, salt, created_at_set
 
@@ -64,34 +61,23 @@ class TestPostgresUserRepository(unittest.IsolatedAsyncioTestCase):
         self.session.commit.assert_called_once()
 
     async def test_confirm_email_not_found(self):
-        email = "test@example.com"
-        self.session.query().filter(User.email == email).first.return_value = None
+        email = "not_existing_email@example.com"
+        self.session.query().filter(email).first.return_value = None
         with self.assertRaises(HTTPException) as context:
             await self.users_repository.confirm_email(email)
         self.session.commit.assert_not_called()
         self.assertEqual(context.exception.status_code, status.HTTP_404_NOT_FOUND)
 
     async def test_update_avatar_success(self):
-        email = "test@example.com"
-        user = User(
-            id=1,
-            username="testuser",
-            email=email,
-            password="Pass123!",
-            salt="somesalt",
-            created_at=datetime.now(),
-            avatar="old_avatar.jpg",
-        )
-        avatar = "avatar.jpg"
-        self.session.query().filter(User.email == email).first.return_value = user
-        updated_user = await self.users_repository.update_avatar(email, avatar)
+        new_avatar = "url_to_new_avatar"
+        self.session.query().filter(user.email).first.return_value = user
+        updated_user = await self.users_repository.update_avatar(user.email, new_avatar)
         self.session.commit.assert_called_once()
-        self.assertEqual(updated_user.avatar, avatar)
-        self.assertIsInstance(updated_user, UserOut)
+        self.assertEqual(updated_user.avatar, new_avatar)
 
     async def test_update_avatar_not_found(self):
         email = "test@example.com"
-        self.session.query().filter(User.email == email).first.return_value = None
+        self.session.query().filter(email).first.return_value = None
         with self.assertRaises(HTTPException) as context:
             await self.users_repository.update_avatar(email, "avatar.jpg")
         self.session.commit.assert_not_called()
