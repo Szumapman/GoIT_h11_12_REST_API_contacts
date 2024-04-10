@@ -1,6 +1,6 @@
 from datetime import datetime, date
 
-from src.database.models import Contact
+from src.database.models import Contact, User
 from src.schemas import ContactOut, ContactIn, UserOut, UserIn
 
 
@@ -9,9 +9,9 @@ _id = 1
 _username = "testuser"
 _password = "Pass123!"
 _user_email = "test@example.com"
-_salt = "somesalt"
-_created_at_set = datetime.now()
 _avatar = "Avatar_url"
+created_at_set = datetime.now()
+salt = "somesalt"
 
 # contact 1
 _contact_id = 1
@@ -29,16 +29,31 @@ _email_2 = "contact_2@example.com"
 _phone_2 = "+48654789655"
 _birth_date_2 = datetime(1988, 4, 16)
 
+user_in = UserIn(
+    username=_username,
+    email=_user_email,
+    password=_password,
+)
 user_out = UserOut(
     id=_id,
     username=_username,
     email=_user_email,
     password=_password,
-    salt=_salt,
-    created_at=_created_at_set,
+    salt=salt,
+    created_at=created_at_set,
     avatar=_avatar,
 )
 
+user = User(
+    id=_id,
+    username=_username,
+    email=_user_email,
+    password=_password,
+    salt=salt,
+    created_at=created_at_set,
+    avatar=_avatar,
+    confirmed=False,
+)
 contact = Contact(
     id=_contact_id,
     first_name=_first_name,
