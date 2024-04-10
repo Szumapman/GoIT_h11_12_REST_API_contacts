@@ -9,6 +9,12 @@ from fastapi import HTTPException, status
 from src.database.models import User
 from src.schemas import UserIn, UserOut
 from src.repository.users import PostgresUserRepository
+from tests.data_set_for_tests import user_out, user_in, user, salt, created_at_set
+
+
+def mock_refresh(user_to_refresh):
+    user_to_refresh.id = 1
+    user_to_refresh.created_at = created_at_set
 
 
 class TestPostgresUserRepository(unittest.IsolatedAsyncioTestCase):
@@ -16,106 +22,45 @@ class TestPostgresUserRepository(unittest.IsolatedAsyncioTestCase):
     def setUp(self):
         self.session = MagicMock(spec=Session)
         self.users_repository = PostgresUserRepository(self.session)
+        self.session.refresh = mock_refresh
 
     # get_user_by_email
     async def test_get_user_by_email_success(self):
-        email = "test@example.com"
-        expected_user = User(id=1, email=email, password="Pass123$")
-        self.session.query().filter().first.return_value = expected_user
-        actual_user = await self.users_repository.get_user_by_email(email)
-        self.assertEqual(expected_user, actual_user)
+        self.session.query().filter().first.return_value = user_out
+        actual_user = await self.users_repository.get_user_by_email(user_out.email)
+        self.assertEqual(user_out, actual_user)
 
     async def test_get_user_by_email_not_found(self):
-        email = "test@example.com"
+        email = "not_existing_email@example.com"
         self.session.query().filter().first.return_value = None
         actual_user = await self.users_repository.get_user_by_email(email)
         self.assertIsNone(actual_user)
 
-    # create_user
-    # @patch("libgravatar.Gravatar", autospec=True)
-    # async def test_create_user_success(self, gravatar_mock):
-    #     created_at_now = datetime.now()
-    #     user_in = UserIn(
-    #         username="testuser",
-    #         email="test@example.com",
-    #         password="Pass123!",
-    #     )
-    #     salt = "somesalt"
-    #     new_user = User(
-    #         id=1,
-    #         username="testuser",
-    #         email="test@example.com",
-    #         password="Pass123!",
-    #         salt="somesalt",
-    #         created_at=created_at_now,
-    #         avatar="Avatar.jpg",
-    #     )
-    #     user_out = UserOut(
-    #         id=1,
-    #         username="testuser",
-    #         email="test@example.com",
-    #         password="Pass123!",
-    #         salt="somesalt",
-    #         created_at=created_at_now,
-    #         avatar="Avatar.jpg",
-    #     )
-    #     gravatar_instance = gravatar_mock.return_value
-    #     gravatar_instance.get_image.return_value = "Avatar.jpg"
-    #
-    #     new_user_instance = MagicMock(user_out=user_out)
-    #
-    #     with patch("src.schemas.UserOut", new_user_instance):
-    #         created_user = await self.users_repository.create_user(user_in, salt)
-    #
-    #     self.session.add.assert_called_once()
-    #     self.session.commit.assert_called_once()
-    #     self.session.refresh.assert_called_once()
-    #
-    #     self.assertEqual(created_user, user_out)
+    async def test_create_user_success(self):
+        created_user = await self.users_repository.create_user(user_in, salt)
 
-    # @patch("libgravatar.Gravatar")
-    # async def test_create_user_success(self, mock_gravatar):
-    #     user_in = UserIn(
-    #         username="testuser", email="test@example.com", password="Password1!"
-    #     )
-    #     salt = "somesalt"
-    #     expected = UserOut(
-    #         id=1,
-    #         username="testuser",
-    #         email="test@example.com",
-    #         password="Password1!",
-    #         salt="somesalt",
-    #         created_at=datetime.now(),
-    #         avatar="Avatar",
-    #     )
-    #
-    #     mock_gravatar.return_value.get_image.return_value = "Avatar"
-    #
-    #     actual = await self.users_repository.create_user(user_in, salt)
-    #
-    #     self.assertEqual(expected.username, actual.username)
-    #     self.assertEqual(expected.email, actual.email)
-    #     self.assertEqual(expected.password, actual.password)
-    #     self.assertEqual(expected.salt, actual.salt)
-    #     self.assertEqual(expected.avatar, actual.avatar)
+        self.assertEqual(user_in.username, created_user.username)
+        self.assertEqual(user_in.email, created_user.email)
+        self.assertEqual(user_in.password, created_user.password)
+        self.assertEqual(salt, created_user.salt)
+        self.assertEqual(created_at_set, created_user.created_at)
+        self.session.add.assert_called_once()
+        self.session.commit.assert_called_once()
 
-    async def test_create_user_gravatar_exception(self):
-        user_in = UserIn(
-            username="testuser", email="test@example.com", password="Password1!"
-        )
-        salt = "somesalt"
-
-        mock_gravatar = patch("libgravatar.Gravatar")
-        mock_gravatar.side_effect = Exception("Gravatar error")
+    @patch("libgravatar.Gravatar.get_image")
+    async def test_create_user_gravatar_exception(self, mock_gravatar):
+        mock_gravatar.side_effect = Exception
 
         with self.assertRaises(Exception):
             await self.users_repository.create_user(user_in, salt)
 
+    async def test_update_token_success(self):
+        token = "some_token"
+        await self.users_repository.update_token(user, token)
+        self.session.commit.assert_called_once()
+
     async def test_confirm_email_success(self):
-        email = "test@example.com"
-        user = User(id=1, email=email, password="Pass123!")
-        self.session.query().filter(User.email == email).first.return_value = user
-        await self.users_repository.confirm_email(email)
+        await self.users_repository.confirm_email(user.email)
         self.session.commit.assert_called_once()
 
     async def test_confirm_email_not_found(self):
@@ -153,20 +98,8 @@ class TestPostgresUserRepository(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(context.exception.status_code, status.HTTP_404_NOT_FOUND)
 
     async def test_update_password_success(self):
-        email = "test@example.com"
-        user = User(
-            id=1,
-            username="testuser",
-            email=email,
-            password="Pass123!",
-            salt="somesalt",
-            created_at=datetime.now(),
-            avatar="old_avatar.jpg",
-        )
-        password = "Pass234!"
-        salt = "new_salt"
-        self.session.query().filter(User.email == email).first.return_value = user
-        await self.users_repository.update_password(email, password, salt)
+        new_password = "Pass234!"
+        await self.users_repository.update_password(user.email, new_password, salt)
         self.session.commit.assert_called_once()
 
 
