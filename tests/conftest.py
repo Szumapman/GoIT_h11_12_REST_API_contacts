@@ -49,9 +49,9 @@ def client(session):
 
     app.dependency_overrides[get_contact_repository] = override_get_contact_repository
 
-    with TestClient(app) as test_client:
-        yield test_client
-    # yield TestClient(app)
+    # with TestClient(app) as test_client:
+    #     yield test_client
+    yield TestClient(app)
 
 
 @pytest.fixture(scope="module")
