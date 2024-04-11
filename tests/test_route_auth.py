@@ -28,3 +28,18 @@ def test_login_user_not_confirmed(client, user):
     assert response.status_code == 401, response.text
     data = response.json()
     assert data["detail"] == "Email not confirmed"
+
+
+def test_login_success(client, session, user):
+    current_user: User = (
+        session.query(User).filter(User.email == user.get("email")).first()
+    )
+    current_user.confirmed = True
+    session.commit()
+    response = client.post(
+        "/api/auth/login",
+        data={"username": user.get("email"), "password": user.get("password")},
+    )
+    assert response.status_code == 200, response.text
+    data = response.json()
+    assert data["token_type"] == "bearer"
