@@ -28,8 +28,8 @@ security = HTTPBearer()
     "/signup",
     response_model=UserCreated,
     status_code=status.HTTP_201_CREATED,
-    description="No more than 10 requests per minute",
-    dependencies=[Depends(RateLimiter(times=10, seconds=60))],
+    # description="No more than 10 requests per minute",
+    # dependencies=[Depends(RateLimiter(times=10, seconds=60))],
 )
 async def signup(
     body: UserIn,
@@ -55,7 +55,7 @@ async def signup(
     if await user_repo.get_user_by_email(body.email):
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT,
-            detail=f"User with email:{body.email} already exists",
+            detail=f"User with email: {body.email} already exists",
         )
     body.password, salt = auth_service.get_password_hash(body.password)
     user = await user_repo.create_user(body, salt)
@@ -69,8 +69,8 @@ async def signup(
 @router.post(
     "/login",
     response_model=TokenModel,
-    description="No more than 10 requests per minute",
-    dependencies=[Depends(RateLimiter(times=10, seconds=60))],
+    # description="No more than 10 requests per minute",
+    # dependencies=[Depends(RateLimiter(times=10, seconds=60))],
 )
 async def login(
     body: OAuth2PasswordRequestForm = Depends(),
@@ -121,8 +121,8 @@ async def login(
 @router.get(
     "/refresh_token",
     response_model=TokenModel,
-    description="No more than 10 requests per minute",
-    dependencies=[Depends(RateLimiter(times=10, seconds=60))],
+    # description="No more than 10 requests per minute",
+    # dependencies=[Depends(RateLimiter(times=10, seconds=60))],
 )
 async def refresh_token(
     credentials: HTTPAuthorizationCredentials = Security(security),
@@ -160,8 +160,8 @@ async def refresh_token(
 
 @router.get(
     "/confirmed_email/{token}",
-    description="No more than 10 requests per minute",
-    dependencies=[Depends(RateLimiter(times=10, seconds=60))],
+    # description="No more than 10 requests per minute",
+    # dependencies=[Depends(RateLimiter(times=10, seconds=60))],
 )
 async def confirm_email(
     token: str, user_repo: AbstractUsersRepository = Depends(get_user_repository)
@@ -195,8 +195,8 @@ async def confirm_email(
 
 @router.post(
     "/request_email",
-    description="No more than 10 requests per minute",
-    dependencies=[Depends(RateLimiter(times=10, seconds=60))],
+    # description="No more than 10 requests per minute",
+    # dependencies=[Depends(RateLimiter(times=10, seconds=60))],
 )
 async def request_email(
     body: RequestEmail,
@@ -236,8 +236,8 @@ async def request_email(
 
 @router.post(
     "/password-reset",
-    description="No more than 10 requests per minute",
-    dependencies=[Depends(RateLimiter(times=10, seconds=60))],
+    # description="No more than 10 requests per minute",
+    # dependencies=[Depends(RateLimiter(times=10, seconds=60))],
 )
 async def request_password_reset(
     body: RequestEmail,
@@ -281,8 +281,8 @@ async def request_password_reset(
 
 @router.post(
     "/password-reset/{token}",
-    description="No more than 10 requests per minute",
-    dependencies=[Depends(RateLimiter(times=10, seconds=60))],
+    # description="No more than 10 requests per minute",
+    # dependencies=[Depends(RateLimiter(times=10, seconds=60))],
 )
 async def reset_password(
     token: str,
