@@ -1,11 +1,10 @@
 import pytest
-from fastapi import FastAPI
 from fastapi.testclient import TestClient
-from fastapi_limiter import FastAPILimiter
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
-from main import app, startup_event
+
+from main import app
 from src.database.models import Base
 from src.database.dependencies import get_user_repository, get_contact_repository
 from src.repository.users import PostgresUserRepository
