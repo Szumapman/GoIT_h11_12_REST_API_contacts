@@ -1,4 +1,15 @@
 ### GoIT moduł 2 web
+# Zadanie domowe #14
+W tym zadaniu domowym kontynuujemy udoskonalanie naszej aplikacji REST API z zadania domowego 13.
+### Zadanie
+- Uzyj **Sphinx** aby stworzyć dokumentację dla swojego zadania domowego. W tym celu dodaj `docstrings` do niezbędnych funkcji i metod klas w głównych modułach.
+- Pokryj moduły repozytorium zadania domowego testami jednostkowymi przy użyciu frameworka `Unittest`. Weź jako podstawę przykład z konspektu modułu `tests/test_unit_repository_notes.py`
+- Pokryj dowolną wybraną ścieżkę z zadania domowego testami funkcjonalnymi przy użyciu frameworka `pytest`.
+
+### Zadanie dodatkowe
+- Pokryj testami ponad 95% swojego zadania domowego. Do kontroli użyj pakietu [pytest-cov](https://pypi.org/project/pytest-cov/).
+
+  
 # Zadanie domowe #13 (Część pierwsza - REST API)
 W tym zadaniu domowym kontynuujemy ulepszanie aplikacji opartej na REST API z poprzedniego zadania domowego.
 ### Zadania
