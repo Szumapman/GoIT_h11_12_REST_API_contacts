@@ -1,4 +1,3 @@
-import os
 from dotenv import load_dotenv
 
 import uvicorn
@@ -38,6 +37,7 @@ async def startup_event():
     redis_base = await redis.Redis(
         host=settings.redis_host,
         port=settings.redis_port,
+        password=settings.redis_password,
         db=0,
         encoding="utf-8",
         decode_responses=True,

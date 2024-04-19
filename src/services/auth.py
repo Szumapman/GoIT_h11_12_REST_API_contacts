@@ -2,7 +2,7 @@ import secrets
 import pickle
 from datetime import datetime, timedelta
 
-import redis
+from redis import Redis
 from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
 from passlib.context import CryptContext
@@ -36,7 +36,12 @@ class Auth:
     ALGORITHM = settings.algorithm
     SALT_LENGTH = settings.salt_length
     oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/auth/login")
-    redis_base = redis.Redis(host=settings.redis_host, port=settings.redis_port, db=0)
+    redis_base = Redis(
+        host=settings.redis_host,
+        port=settings.redis_port,
+        password=settings.redis_password,
+        db=0,
+    )
 
     def __init__(self, user_repository: AbstractUsersRepository) -> None:
         """
