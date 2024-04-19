@@ -11,3 +11,4 @@ cloudinary
 sqlalchemy
 pydantic[dotenv]
 uvicorn
+pydantic-extra-types
