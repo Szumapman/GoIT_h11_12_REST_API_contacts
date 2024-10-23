@@ -6,7 +6,7 @@ from src.services.auth import auth_service
 from src.database.models import User
 
 
-def test_signup_success(client, user, monkeypatch):
+async def test_signup_success(client, user, monkeypatch):
     with patch.object(auth_service, "redis_base") as mock_redis:
         mock_redis.get.return_value = None
         mock_send_email = MagicMock()
@@ -18,7 +18,7 @@ def test_signup_success(client, user, monkeypatch):
         assert data["detail"] == "User successfully created"
 
 
-def test_signup_failure_user_already_exists(client, user):
+async def test_signup_failure_user_already_exists(client, user):
     with patch.object(auth_service, "redis_base") as mock_redis:
         mock_redis.get.return_value = None
         response = client.post("/api/auth/signup", json=user)
@@ -27,7 +27,7 @@ def test_signup_failure_user_already_exists(client, user):
         assert data["detail"] == f"User with email: {user.get('email')} already exists"
 
 
-def test_login_user_not_confirmed(client, user):
+async def test_login_user_not_confirmed(client, user):
     response = client.post(
         "/api/auth/login",
         data={"username": user.get("email"), "password": user.get("password")},
@@ -37,7 +37,7 @@ def test_login_user_not_confirmed(client, user):
     assert data["detail"] == "Email not confirmed"
 
 
-def test_login_success(client, session, user):
+async def test_login_success(client, session, user):
     current_user: User = (
         session.query(User).filter(User.email == user.get("email")).first()
     )
@@ -52,7 +52,7 @@ def test_login_success(client, session, user):
     assert data["token_type"] == "bearer"
 
 
-def test_login_failure_wrong_password(client, user):
+async def test_login_failure_wrong_password(client, user):
     response = client.post(
         "/api/auth/login",
         data={"username": user.get("email"), "password": "wrong_password"},
@@ -62,7 +62,7 @@ def test_login_failure_wrong_password(client, user):
     assert data["detail"] == "Incorrect email or password"
 
 
-def test_login_failure_wrong_email(client, user):
+async def test_login_failure_wrong_email(client, user):
     response = client.post(
         "/api/auth/login",
         data={"username": "wrong_email", "password": user.get("password")},
