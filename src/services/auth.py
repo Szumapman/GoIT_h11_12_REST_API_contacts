@@ -35,13 +35,15 @@ class Auth:
     SECRET_KEY = settings.secret_key
     ALGORITHM = settings.algorithm
     SALT_LENGTH = settings.salt_length
-    oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/auth/login")
     redis_base = Redis(
         host=settings.redis_host,
         port=settings.redis_port,
         password=settings.redis_password,
         db=0,
     )
+    redis_base.set("bool", int(bool))
+
+    oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/auth/login")
 
     def __init__(self, user_repository: AbstractUsersRepository) -> None:
         """
@@ -188,7 +190,7 @@ class Auth:
             user = await self._user_repository.get_user_by_email(email)
             if user is None:
                 raise credentials_exception
-            self.redis_base.set(f"user:{email}", pickle.dumps(user))
+            await self.redis_base.set(f"user:{email}", pickle.dumps(user))
             self.redis_base.expire(f"user:{email}", 900)
         else:
             user = pickle.loads(user)
